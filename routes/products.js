@@ -2,10 +2,48 @@ const express = require("express");
 const router = express.Router();
 const Products = require("./../models/products");
 const autenticate = require("./../middleware/auth");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
+
+router.post(
+  "/products",
+  autenticate,
+  upload.single("image"),
+  async (req, res) => {
+    const { name, price, color, category } = req.body;
+    let product = new Products({
+      name,
+      price,
+      color,
+      category,
+      image: req.file ? `/uploads/${req.file.filename}` : undefined,
+    });
+
+    try {
+      await product.save();
+      res.status(200).send({
+        message: "Product created successfully",
+        product: product,
+      });
+    } catch (err) {
+      res.status(500).send({ error: err.message });
+    }
+  }
+);
 
 router.get("/products", async (req, res) => {
   try {
-    let { page = 1, limit = 100, price1, price2, color } = req.query;
+    let { page = 1, limit = 100, price1, price2, color, category } = req.query;
 
     let query = {};
     if (price1 && price2) {
@@ -14,11 +52,17 @@ router.get("/products", async (req, res) => {
     if (color) {
       query.color = color;
     }
+    if (category) {
+      query.category = category;
+    }
 
     let skip = (page - 1) * limit;
     limit = parseInt(limit);
 
-    let all = await Products.find(query).skip(skip).limit(limit);
+    let all = await Products.find(query)
+      .skip(skip)
+      .limit(limit)
+      .populate("category");
 
     res.status(200).send(all);
   } catch (err) {
@@ -30,23 +74,6 @@ router.get("/products/:id", async (req, res) => {
   try {
     let product = await Products.findById(req.params.id);
     res.status(200).send(product);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
-});
-
-router.post("/products", autenticate, async (req, res) => {
-  try {
-    let product = new Products({
-      name: req.body.name,
-      price: req.body.price,
-      color: req.body.color,
-    });
-    await product.save();
-    res.status(200).send({
-      message: "Product created successfully",
-      product: product,
-    });
   } catch (err) {
     res.status(500).send({ error: err.message });
   }
