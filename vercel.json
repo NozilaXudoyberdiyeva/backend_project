@@ -8,6 +8,22 @@
   ],
   "routes": [
     {
+      "src": "/products",
+      "dest": "/products"
+    },
+    {
+      "src": "/categories",
+      "dest": "/categories"
+    },
+    {
+      "src": "/login",
+      "dest": "/login"
+    },
+    {
+      "src": "/register",
+      "dest": "/register"
+    },
+    {
       "src": "/(.*)",
       "dest": "/"
     }
