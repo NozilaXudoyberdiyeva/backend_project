@@ -4,10 +4,12 @@ const ProductsRoute = require("./routes/products");
 const CategoriesRoute = require("./routes/categories");
 const UsersRouter = require("./routes/users");
 const RegisterRouter = require("./routes/auth");
-const multer = require("multer");
 const path = require("path");
 const app = express();
+const cors = require("cors");
 app.use(express.json());
+
+app.use(cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
