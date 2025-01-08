@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.use(cors());
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "/uploads/")));
 
 const url =
   "mongodb+srv://nozilaxudoyberdiyeva:BHxlJ5mVJgUetRDp@cluster0.e46r8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";

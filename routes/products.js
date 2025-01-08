@@ -79,23 +79,42 @@ router.get("/products/:id", async (req, res) => {
   }
 });
 
-router.put("/products/:id", autenticate, async (req, res) => {
-  try {
-    let product = await Products.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      lean: true,
-    });
-    if (!product) {
-      return res.status(404).send({ message: "Product not found" });
+router.put(
+  "/products/:id",
+  autenticate,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      // Yangilanish uchun ma'lumotlarni yig'ish
+      const updatedData = { ...req.body };
+
+      // Fayl mavjud bo'lsa, image fieldni yangilash
+      if (req.file) {
+        updatedData.image = `/uploads/${req.file.filename}`;
+      }
+
+      let product = await Products.findByIdAndUpdate(
+        req.params.id,
+        updatedData,
+        {
+          new: true,
+          lean: true,
+        }
+      );
+
+      if (!product) {
+        return res.status(404).send({ message: "Product not found" });
+      }
+
+      res.status(200).send({
+        message: "Product updated successfully",
+        product: product,
+      });
+    } catch (err) {
+      res.status(500).send({ error: err.message });
     }
-    res.status(200).send({
-      message: "Product updated successfully",
-      product: product,
-    });
-  } catch (err) {
-    res.status(500).send({ error: err.message });
   }
-});
+);
 
 router.delete("/products/:id", autenticate, async (req, res) => {
   try {
